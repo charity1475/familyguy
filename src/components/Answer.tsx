@@ -17,24 +17,18 @@ import { MdNearbyError } from 'react-icons/md'
 import { FaCheck } from 'react-icons/fa'
 
 interface Props {
-    answers: string[],
-    questionId: string
+  answers: string[],
+  questionId: string
 }
 
-interface Question {
-    id: string;
-    title: string;
-    answers: string[];
-    correct_answer: string;
-  }
-  
-  interface QuestionProp {
-    question: Question;
-  }
+interface Data {
+  correct: string;
+  random: string;
+}
 
-export const Answer = ({ answers, questionId }:Props) => {
+export const Answer = ({ answers, questionId }: Props) => {
   const [selected, setSeleceted] = useState('')
-  const [data, setData] = useState<Question | null>(null)
+  const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -43,7 +37,7 @@ export const Answer = ({ answers, questionId }:Props) => {
       setLoading(true)
       fetch(`/api/quiz/answer/${questionId}`)
         .then(res => res.json())
-        .then((data: Question) => {
+        .then((data: Data) => {
           setLoading(false)
           if (subscribed) {
             setData(data)
@@ -56,7 +50,6 @@ export const Answer = ({ answers, questionId }:Props) => {
       subscribed = false
     }
   }, [questionId, selected])
-  console.log(data);
 
   return (
     <>
@@ -64,13 +57,13 @@ export const Answer = ({ answers, questionId }:Props) => {
         {answers.map(item => {
           const isLoading = selected === item && loading
           const isWrong =
-            selected === item && data && data?.correct_answer !== selected
-          const isCorrect = data?.correct_answer === item
+            selected === item && data && data?.correct !== selected
+          const isCorrect = data?.correct === item
 
           return (
             <li key={item}>
               <button
-                // disabled={data || loading}
+                disabled={(data) ? true : false || loading}
                 onClick={() => setSeleceted(item)}
                 className={cn(
                   'p-2 rounded-md  items-center justify-between w-full flex text-sm font-semibold disabled:cursor-not-allowed transition-all',
@@ -87,9 +80,9 @@ export const Answer = ({ answers, questionId }:Props) => {
           )
         })}
       </ul>
-      {data?.correct_answer && (
+      {data?.random && (
         <Link
-          href={`/quiz/${data.correct_answer}`}
+          href={`/quiz/${data.random}`}
           className="flex items-center gap-1 text-blue-400"
         >
           <FiRepeat className="mt-1" />
